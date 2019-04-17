@@ -46,6 +46,9 @@
                 spreadsheetId: SpreadSheetID,
                 range: 'C2:C',
             }).then(function (response) {
+                while(tableBody.lastChild){
+                    tableBody.removeChild(tableBody.lastChild)
+                }
                 var result = response.result; 
                 if(result.values != undefined && result.values.length > 0){
                     
