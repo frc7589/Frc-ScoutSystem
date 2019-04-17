@@ -8,7 +8,7 @@ $(document).ready(function(){
     handleClientLoad()
 })
 
-var SpreadSheetID = "1v1pIhviz6s-MLW5zD6ay6PcOBNF9pfg404XmXmXUZ5g"
+var SpreadSheetID = "1mZoZ8FZ9aiTTYrtb7UGbWUmhcIhNBV9Gso8tS6rCROs"
 
 function authBtnHandler(){
     gapi.auth2.getAuthInstance().signIn()
