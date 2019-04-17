@@ -19,11 +19,28 @@
     </script>
     <script src="https://apis.google.com/js/api.js" ></script>
     <!--Css-->
-
+    <link rel="stylesheet" href="/style/spin.css">
     <!--Js-->
     <script src="/js/clickableDiv.js"></script>
     <script src="/js/gsheet.js" ></script>
     <script src="/js/main.js" ></script>
+    <script>
+        $(document).ready(function(){
+            var hintErr = document.getElementById('hint-err')
+            var hintSuccess = document.getElementById('hint-success')
+            var loader = document.getElementById('loading')
+            GAPIFailListener(function(){
+                $(loader).hide()
+                $(hintErr).show()
+                $(hintSuccess).hide()
+            })
+            GAPIEventListener(function(){
+                $(loader).hide()
+                $(hintErr).hide()
+                $(hintSuccess).show()
+            })
+        })
+    </script>
 </head>
 
 <body>
@@ -45,14 +62,23 @@
                         <a class="nav-link" href="match.html">新增Match</a>
                     </li>
                 </ul>
-                <button class="btn btn-primary" id="auth-btn" onclick=authBtnHandler() style="display:none;"><i class="fab fa-google mr-2"></i>登入Google</button>
+                <button class="btn btn-primary" id="auth-btn" onclick=authBtnHandler() style="display:inline;"><i class="fab fa-google mr-2"></i>登入Google</button>
                 <button class="btn btn-danger" id="logout-btn" style="display:none;" onclick=logoutBtnHandler()> <i class="fas fa-sign-out-alt mr-2"></i>登出</button>
             </div>
-            
         </nav>
     </header>
-    <div class="container" id="scout-cont">
-        <div class="row">
+    <div style="height:100%;" id="loading">
+        <div class="loader position-absolute"
+            style="height:100px;width:100px;top: 50%;left: 50%;transform: translate(-50%, -50%);"></div>
+    </div>
+    <div class="container text-center" id="scout-cont">
+        <div id="hint-err" style="display:none;">
+            <i class="fas fa-user-times fa-10x text-danger mb-2"></i>
+            <h1 class="lead text-danger">請先登入再使用系統喔</h1>
+        </div>
+        <div id="hint-success" style="display:none;" class="text-center">
+            <i class="fas fa-user-check fa-10x text-success mb-2"></i>
+            <h1 class="lead text-success">登入成功</h1>
         </div>
     </div>
 </body>

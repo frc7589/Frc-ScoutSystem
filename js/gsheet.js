@@ -21,6 +21,7 @@ function updateSigninStatus(isSignedIn) {
     } else {
         authBtn.style.display = 'inline';
         logoutBtn.style.display = 'none';
+        GAPIFailRun()
     }
 }
 
@@ -51,6 +52,13 @@ function initClient() {
     });
 }
 
+function isSignIn(){
+    return gapi.auth2.getAuthInstance().isSignedIn
+}
+
+function isFunction(functionToCheck) {
+    return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+}
 
 var EventList = []
 function GAPIEventListener(n) {
@@ -59,6 +67,19 @@ function GAPIEventListener(n) {
 
 function GAPIRunEvent(){
     for(i=0;i<EventList.length;i++){
-        EventList[i]()
+        if(isFunction(EventList[i]))
+            EventList[i]()
+    }
+}
+
+var FailEventList = []
+function GAPIFailListener(n) {
+    FailEventList.push(n)
+}
+
+function GAPIFailRun(){
+    for(i=0;i<EventList.length;i++){
+        if(isFunction(FailEventList[i]))
+            FailEventList[i]()
     }
 }

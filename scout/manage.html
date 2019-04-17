@@ -33,13 +33,14 @@
             semifinal: "準決賽(Semifinal Match)",
             final: "決賽(Final Match)",
         }
-        var mainContainer, loader, table, tableBody
+        var mainContainer, loader, table, tableBody ,searchBar
 
         function elementGet() {
             mainContainer = document.getElementById('scout-cont')
             loader = document.getElementById('loading')
             table = document.getElementById('scout-table')
             tableBody = table.getElementsByTagName('tbody')[0]
+            searchBar = document.getElementById('search')
         }
         $(document).ready(function () {
             elementGet()
@@ -47,13 +48,41 @@
             GAPIEventListener(loadHandler)
         })
 
+        function searchHandler(event){
+            filter =  searchBar.value.toUpperCase()
+            tr = tableBody.getElementsByTagName('tr')
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td");
+                th = tr[i].getElementsByTagName('th')[0];
+                flag = ((th.textContent || th.innerText).indexOf(filter) > -1)
+                for(j = 0;j < td.length ;j++){
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.indexOf(filter) > -1) {
+                        flag = true
+                    }
+                }
+                if(flag){
+                    $(tr[i]).show()
+                }else{
+                    $(tr[i]).hide()
+                }
+            }
+        }
+
         function loadHandler() {
+            if(!isSignIn()){
+                alert('未登入')
+                return;
+            }
             gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId: SpreadSheetID,
                 range: 'A2:C',
             }).then(function (response) {
+                while(tableBody.lastChild){
+                    tableBody.removeChild(tableBody.lastChild)
+                }
                 var result = response.result;
-                if (result.values.length > 0 || result != undefined) {
+                if (result.values != undefined && result.values.length > 0) {
                     for (i = 0; i < result.values.length; i++) {
                         tr = document.createElement('tr')
                         th = document.createElement('th')
@@ -72,17 +101,19 @@
                             content = result.values[i][j]
                             if(j == 0){
                                 content = matchType[content]
+                                attr = document.createAttribute('data-val')
+                                attr.value = result.values[i][j]
                             }
                             td.appendChild(document.createTextNode(content))
                             tr.appendChild(td)
                         }
                         tableBody.appendChild(tr)
                     }
-                    $(mainContainer).show()
-                    $(loader).hide()
                 } else {
-                    alert('No data found.');
+                    alert('無資料');
                 }
+                $(mainContainer).show()
+                $(loader).hide()
             }, function (response) {
                 alert('Error: ' + response.result.error.message);
             });
@@ -92,14 +123,14 @@
 
 <body>
     <header>
-        <nav class="navbar navbar-dark navbar-expand bg-dark mb-3 p-3" id="navbar">
+        <nav class="navbar navbar-dark navbar-expand-md bg-dark mb-3 p-3" id="navbar">
             <a class="navbar-brand" href="/">FRC 7589 Scout系統 -- Scout 端</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarItem">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarItem">
-                <ul class="mr-auto navbar-nav">
-                    <li class="nav-item">
+                <ul class="mr-md-auto navbar-nav">
+                    <li class="nav-item" >
                         <a class="nav-link" href="index.html">公告</a>
                     </li>
                     <li class="nav-item active">
@@ -109,12 +140,9 @@
                         <a class="nav-link" href="match.html">新增Match</a>
                     </li>
                 </ul>
-                <button class="btn btn-primary" id="auth-btn" onclick=authBtnHandler() style="display:none;"><i
-                        class="fab fa-google mr-2"></i>登入Google</button>
-                <button class="btn btn-danger" id="logout-btn" style="display:none;" onclick=logoutBtnHandler()> <i
-                        class="fas fa-sign-out-alt mr-2"></i>登出</button>
+                <button class="btn btn-primary" id="auth-btn" onclick=authBtnHandler() style="display:none;"><i class="fab fa-google mr-2"></i>登入Google</button>
+                <button class="btn btn-danger" id="logout-btn" style="display:none;" onclick=logoutBtnHandler()> <i class="fas fa-sign-out-alt mr-2"></i>登出</button>
             </div>
-
         </nav>
     </header>
     <div style="height:100%;" id="loading">
@@ -122,6 +150,16 @@
             style="height:100px;width:100px;top: 50%;left: 50%;transform: translate(-50%, -50%);"></div>
     </div>
     <div class="container" id="scout-cont">
+        <div>
+            <p class="lead">管理系統</p>
+            <hr>
+        </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control border-primary" placeholder="搜尋" id="search" onchange="searchHandler()">
+            <div class="input-group-append">
+                <button class="btn btn-outline-primary" type="button" onclick="searchHandler()">搜尋</button>
+            </div>
+        </div>
         <table class="table table-hover table-striped" id="scout-table">
             <thead class="thead-dark">
                 <tr>

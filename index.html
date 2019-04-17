@@ -19,22 +19,66 @@
     </script>
     <script src="https://apis.google.com/js/api.js" ></script>
     <!--Css-->
-
+    <link rel="stylesheet" href="/style/spin.css">
     <!--Js-->
     <script src="/js/clickableDiv.js"></script>
     <script src="/js/gsheet.js" ></script>
     <script src="/js/main.js"></script>
+    <script>
+        $(document).ready(function(){
+            var hintErr = document.getElementById('hint-cont')
+            var menu = document.getElementById('menu-cont')
+            var loader = document.getElementById('loading')
+            GAPIFailListener(function(){
+                $(loader).hide()
+                $(hintErr).show()
+                $(menu).hide()
+            })
+            GAPIEventListener(function(){
+                $(loader).hide()
+                $(hintErr).hide()
+                $(menu).show()
+            })
+        })
+    </script>
 </head>
 
 <body>
     <header>
         <nav class="navbar navbar-dark navbar-expand bg-dark mb-3 p-3" id="navbar">
             <span class="navbar-brand mr-auto">FRC 7589 Scout系統</span>
-            <button class="btn btn-primary" id="auth-btn" onclick=authBtnHandler() style="display:none;"><i class="fab fa-google mr-2"></i>登入Google</button>
             <button class="btn btn-danger" id="logout-btn" style="display:none;" onclick=logoutBtnHandler()> <i class="fas fa-sign-out-alt mr-2"></i>登出</button>
         </nav>
     </header>
-    <div class="container" id="menu-cont">
+    <div style="height:100%;" id="loading">
+        <div class="loader position-absolute"
+            style="height:100px;width:100px;top: 50%;left: 50%;transform: translate(-50%, -50%);"></div>
+    </div>
+    <div class="container ustify-content-center text-center" id="hint-cont" style="display:none;">
+        <p class="lead text-danger">趕快登入!!!</p>
+        <div>                
+            <pre class="d-inline-block text-left">
+    <button class="btn btn-primary" id="auth-btn" onclick=authBtnHandler() style="display:none;"><i class="fab fa-google mr-2"></i>登入Google</button>
+／ イ  　　    (((ヽ
+(　ﾉ　　　　     ￣Ｙ＼
+|　(＼　(\   /)   ｜  )
+ヽ　ヽ` ( ﾟ∀ﾟ )_ノ   /
+　＼ |　⌒Ｙ⌒　 /  /
+　 ｜ヽ　 ｜　 ﾉ ／
+　  ＼トー仝ーイ
+　　 ｜ ミ土彡/
+     )\   °  /
+    (  \  / \
+    /   / \\  \
+   //  /   \\  \
+   (( ).   )). )
+  (   ).   (|   |
+  |  /      \   |
+ nn. ).     (  nnm
+            </pre>
+        </div>
+    </div>
+    <div class="container" id="menu-cont" style="display:none;">
         <div class="row">
             <div class="col-md-6 col-12 mb-3 mb-md-0">
                 <div class="card clickDiv" href="scout/">
