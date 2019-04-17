@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Scout系統 -- Scout 端</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--External CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <!--cross origin Js-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <!--Css-->
+    <link rel="stylesheet" href="/style/spin.css">
+    <style>
+        .form-inline .form-control {
+            flex-grow: 1;
+        }
+    </style>
+    <!--Js-->
+    <script src="/js/clickableDiv.js"></script>
+    <script src="/js/gsheet.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        var forms, matchType, matchNumber, teamNumber, cargoSuc, cargoAll, panelSuc, panelAll, startLayer, endLayer,
+            comment
+        var formsEles
+        var mainContainer, successContainer, submitBtn
+        var params
+        var devInfo, profile
+        function elementGet() {
+            forms = document.forms["main"]
+            matchType = forms["matchType"]
+            matchNumber = forms["matchNumber"]
+            teamNumber = forms["teamNumber"]
+            cargoSuc = forms["cargo-success"]
+            cargoAll = forms["cargo-all"]
+            panelSuc = forms["panel-success"]
+            panelAll = forms["panel-all"]
+            startLayer = forms["startLayer"]
+            endLayer = forms["endLayer"]
+            comment = forms["comment"]
+
+            mainContainer = document.getElementById('scout-cont')
+            successContainer = document.getElementById('success-cont')
+            submitBtn = document.getElementById('submitBtn')
+            formsEles = [matchType, matchNumber, teamNumber, cargoSuc, cargoAll, panelSuc, panelAll, startLayer,
+                endLayer, comment
+            ]
+            GAPIEventListener(function(){
+                profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile()
+                devInfo = [ profile.getEmail(), undefined,  ]
+            })
+        }
+        $(document).ready(function () {
+            elementGet()
+            $(successContainer).hide()
+            params = new URLSearchParams(location.search);
+            checker()
+            $(mainContainer).hide()
+            GAPIEventListener(loadingHandler)
+        })
+
+        function checker() {
+            if (!params.has('row')) {
+                window.location.replace("match.html");
+                return;
+            }
+        }
+
+        function loadingHandler() {
+            var row = params.get('row')
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: SpreadSheetID,
+                range: 'A' + row + ':L' + row,
+            }).then(function (response) {
+                var result = response.result;
+                if (result.values.length > 0 || result != undefined) {
+                    for (i = 0; i < formsEles.length; i++) {
+                        if (result.values[0][i] != undefined) {
+                            formsEles[i].value = result.values[0][i]
+                        }
+                    }
+                } else {
+                    alert('No data found.');
+                }
+                $('#loading').hide()
+                $(mainContainer).show()
+            }, function (response) {
+                alert('Error: ' + response.result.error.message);
+            });
+        }
+
+        function submitHandler() {
+            if (!forms.checkValidity()) {
+                return false
+            }
+            submitBtn.disabled = true
+            var content = [];
+            for (i = 0; i < formsEles.length; i++) {
+                content.push(formsEles[i].value)
+            }
+            for(i = 0;i < devInfo.length; i++){
+                if(i == 1){
+                    devInfo[i] = Date.now()
+                }
+                content.push(devInfo[i])
+            }
+            var body = [content];
+            var param = {
+                spreadsheetId: SpreadSheetID,
+                range: 'main!A'+params.get('row')+':L'+params.get('row'),
+                valueInputOption: 'USER_ENTERED',
+                resource: {
+                    values: body
+                }
+            };
+            gapi.client.sheets.spreadsheets.values.update(param).then(function (response) {
+                console.log(response.result);
+                $(mainContainer).hide();
+                $(successContainer).show()
+                submitBtn.disabled = false
+            }, function (reason) {
+                alert('error: ' + reason.result.error.message);
+                submitBtn.disabled = false
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-dark navbar-expand bg-dark mb-3 p-3" id="navbar">
+            <span class="navbar-brand">FRC 7589 Scout系統 -- Scout 端</span>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarItem">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarItem">
+                <ul class="mr-auto navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">公告</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage.html">管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="match.html">新增Match</a>
+                    </li>
+                </ul>
+                <button class="btn btn-primary" id="auth-btn" onclick=authBtnHandler() style="display:none;"><i
+                        class="fab fa-google mr-2"></i>登入Google</button>
+                <button class="btn btn-danger" id="logout-btn" style="display:none;" onclick=logoutBtnHandler()> <i
+                        class="fas fa-sign-out-alt mr-2"></i>登出</button>
+            </div>
+
+        </nav>
+    </header>
+    <div style="height:100%;" id="loading">
+        <div class="loader position-absolute" style="height:100px;width:100px;top: 50%;left: 50%;transform: translate(-50%, -50%);"></div>
+    </div>
+    <div class="container" id="scout-cont">
+        <form name="main" onsubmit="return false">
+            <button class="btn btn-success" onclick="submitHandler()" id="submitBtn">確定提交</button>
+            <hr>
+            <div class="form-group">
+                <label>Match Type</label>
+                <select name="matchType" class="form-control">
+                    <option value="qualify">資格賽(Qualification Match)</option>
+                    <option value="quarter">(Quarterfinal Match)</option>
+                    <option value="semifinal">準決賽(Semifinal Match)</option>
+                    <option value="final">決賽(Final Match)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Match Number</label>
+                <input class="form-control" name="matchNumber" type="tel" pattern="[0-9]{1,2}-{0,1}[0-9]{0,2}" required>
+            </div>
+            <div class="form-group">
+                <label>隊號(Team Number)</label>
+                <input class="form-control" name="teamNumber" type="number" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group col">
+                    <label class="mr-1">投球數統計</label>
+                    <div class="form-inline my-3">
+                        <label class="mx-1">成功</label>
+                        <input class="form-control form-control" name="cargo-success" type="number" value=0 min=0>
+                        <button class="btn btn-success mx-2" onclick="cargoSuc.value++;cargoAll.value++">+</button>
+                    </div>
+                    <div class="form-inline my-3">
+                        <label class="mx-1">總共</label>
+                        <input class="form-control form-control" name="cargo-all" type="number" value=0 min=0>
+                        <button class="btn btn-warning mx-2" onclick="cargoAll.value++">+</button>
+                    </div>
+                </div>
+                <div class="form-group col">
+                    <label class="mr-1">放盤子數統計</label>
+                    <div class="form-inline my-3">
+                        <label class="mx-1">成功</label>
+                        <input class="form-control form-control" name="panel-success" type="number" value=0 min=0>
+                        <button class="btn btn-success mx-2" onclick="panelSuc.value++;panelAll.value++">+</button>
+                    </div>
+                    <div class="form-inline my-3">
+                        <label class="mx-1">總共</label>
+                        <input class="form-control form-control" name="panel-all" type="number" value=0 min=0>
+                        <button class="btn btn-warning mx-2" onclick="panelAll.value++">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col">
+                    <label>出發層數</label>
+                    <select name="startLayer" class="form-control">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                    </select>
+                </div>
+                <div class="form-group col">
+                    <label>結束層數</label>
+                    <select name="endLayer" class="form-control">
+                        <option>0</option>
+                        <option selected>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>註記</label>
+                <textarea class="form-control" name="comment"></textarea>
+            </div>
+        </form>
+    </div>
+
+    <div id="success-cont" class="container">
+        <span class="text-center">
+            <p>
+                <i class="far fa-check-circle fa-10x text-success"></i>
+                <br>
+                <span class="mx-5 lead">提交成功</span>
+            </p>
+        </span>
+    </div>
+</body>
+
+</html>
