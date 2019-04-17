@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Scout系統 -- Driver 端</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--External CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <!--cross origin Js-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous" >
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous" >
+    </script>
+    <script src="https://apis.google.com/js/api.js" ></script>
+    <!--Css-->
+
+    <!--Js-->
+    <script src="/js/clickableDiv.js"></script>
+    <script src="/js/gsheet.js" ></script>
+    <script src="/js/main.js" ></script>
+    <script>
+        function elementget(){
+            var cargoAvg ,panalAvg ,cargeSuc ,panalSuc
+
+        }
+        $(document).ready(function () {
+            elementget()
+            //$(successContainer).hide()
+            params = new URLSearchParams(location.search);
+            checker()
+            $(mainContainer).hide()
+            GAPIEventListener(loadingHandler)
+        })
+
+    </script>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-dark navbar-expand-md bg-dark mb-3 p-3" id="navbar">
+            <a href="/" class="navbar-brand mr-auto">FRC 7589 Scout系統 -- Driver 端</a>
+            <h2 class="text-center" style="color:white" >7589</h2>
+            <button class="btn btn-primary ml-auto" id="auth-btn" onclick=authBtnHandler() style="display:none;"><i class="fab fa-google mr-2"></i>登入Google</button>
+            <button class="btn btn-danger ml-auto" id="logout-btn" style="display:none;" onclick=logoutBtnHandler()> <i class="fas fa-sign-out-alt mr-2"></i>登出</button>
+        </nav>
+    </header>
+    
+    <div class="container-fluid" id="driver-info">
+        <form name="main" onsubmit="return false">
+
+            <a href="/driver/index.html" class="navbar-brand mr-auto">回上一頁</a>
+
+            
+        </form>
+    </div>
+
+</body>
+
+</html>
