@@ -13,9 +13,6 @@
         integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <!--cross origin Js-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
-    </script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
     </script>
@@ -60,6 +57,10 @@
             GAPIEventListener(function(){
                 profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile()
                 devInfo = [ profile.getEmail(), undefined,  ]
+                submitBtn.disabled = false
+            })
+            GAPIFailListener(function(){
+                submitBtn.disabled = true
             })
         }
         $(document).ready(function () {
@@ -144,13 +145,13 @@
 
 <body>
     <header>
-        <nav class="navbar navbar-dark navbar-expand bg-dark mb-3 p-3" id="navbar">
+        <nav class="navbar navbar-dark navbar-expand-md bg-dark mb-3 p-3" id="navbar">
             <a class="navbar-brand" href="/">FRC 7589 Scout系統 -- Scout 端</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarItem">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarItem">
-                <ul class="mr-auto navbar-nav">
+                <ul class="mr-md-auto navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="index.html">公告</a>
                     </li>
@@ -174,7 +175,7 @@
     </div>
     <div class="container" id="scout-cont">
         <form name="main" onsubmit="return false">
-            <button class="btn btn-success" onclick="submitHandler()" id="submitBtn">確定提交</button>
+            <button class="btn btn-success" onclick="submitHandler()" id="submitBtn" disabled>確定提交</button>
             <hr>
             <div class="form-group">
                 <label>Match Type</label>
