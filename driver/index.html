@@ -51,21 +51,25 @@
                 }
                 var result = response.result; 
                 if(result.values != undefined && result.values.length > 0){
-                    
+                    var used = new Set();
                     for(i = 0;i < result.values.length ; i++){
-                        tr = document.createElement('tr')
-                        th = document.createElement('th')
-                        anchor = document.createElement('a')
-                        anchor.appendChild(document.createTextNode((result.values[i])))
-                        link = document.createAttribute('href')
-                        link.values = 'info.html?team='+(result.values[i])
-                        anchor.setAttributeNode(link)
-                        th.appendChild(anchor)
-                        attr = document.createAttribute('scope')
-                        attr.value = 'row'
-                        th.setAttributeNode(attr)
-                        tr.appendChild(th)
-                        tableBody.appendChild(tr)
+                        var val = result.values[i]
+                        if(!used.has(val[0])){
+                            used.add(val[0]);
+                            tr = document.createElement('tr')
+                            th = document.createElement('th')
+                            anchor = document.createElement('a')
+                            anchor.appendChild(document.createTextNode(val))
+                            link = document.createAttribute('href')
+                            link.value = 'info.html?team='+(val[0]).toString()
+                            anchor.setAttributeNode(link)
+                            th.appendChild(anchor)
+                            attr = document.createAttribute('scope')
+                            attr.value = 'row'
+                            th.setAttributeNode(attr)
+                            tr.appendChild(th)
+                            tableBody.appendChild(tr)
+                        }
                     }
                     $(mainContainer).show()
                     $(loader).hide()
@@ -84,19 +88,14 @@
                 tr = tableBody.getElementsByTagName('tr')
                 for(i = 0; i < th.length;i++){
                     if(th[i]){
-                        var flag = false
                         txt = th[i].textContent 
-                        if(txt == filter){
-                            flag = true
-                        }
                         if(filter == ""){
-                            flag = true
-                        }
-
-                        if(flag){
                             $(tr[i]).show()
                         }
-                        else{
+                        else if(txt == filter){
+                            $(tr[i]).show()
+                        }
+                        else {
                             $(tr[i]).hide()
                         }
                     }
@@ -122,16 +121,16 @@
     <div class="container" id="driver-cont">
         <form name="main" onsubmit="return false">
             <div class="input-group mb-3">
-                <input type="tel" class="form-control" placeholder="Team Number" aria-label="Team Number" pattern="[0-9]{1,5}" title="輸入對的隊號啦!" onchange="search()" id="search-bar">
+                <input type="tel" class="form-control" placeholder="隊號" aria-label="Team Number" pattern="[0-9]{1,5}" title="輸入對的隊號啦!" onchange="search()" id="search-bar">
                 <div class="input-group-append">
-                    <button class="btn btn-outline-primary" type="submit" id="search-button" onclick="search()">find</button>
+                    <button class="btn btn-outline-primary" type="submit" id="search-button" onclick="search()">搜尋</button>
                 </div>
             </div>
         </form>
         <table class="table table-striped table-hover" id="driver-table">
                 <thead class="thead-dark">
                     <tr>
-                        <th scope="col">Team Number</th>
+                        <th scope="col">隊號</th>
                     </tr>
                 </thead>
             <tbody>

@@ -24,19 +24,194 @@
     <script src="/js/clickableDiv.js"></script>
     <script src="/js/gsheet.js" ></script>
     <script src="/js/main.js" ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <script>
+            var teamNumber, panalAvg, cargoAvg, panalSuc, cargoSuc, scoreAvg
+            var startLevel = [0,0,0], endLevel = [0,0,0], scoutEva = []
+            var gameSum = Number(0), panalTrySum = Number(0), cargoTrySum = Number(0), panalSucSum = Number(0), cargoSucSum = Number(0)
+            var tableBody
         function elementget(){
-            var cargoAvg ,panalAvg ,cargeSuc ,panalSuc
-
+            tableBody = document.getElementsByTagName('tbody')
         }
         $(document).ready(function () {
             elementget()
-            //$(successContainer).hide()
             params = new URLSearchParams(location.search);
-            checker()
-            $(mainContainer).hide()
             GAPIEventListener(loadingHandler)
+            checker()
         })
+
+        function checker() {
+            if (!params.has('team')) {
+                window.location.replace("index.html");
+                return;
+            }
+            TN = document.getElementById('TN')
+            TN.appendChild(document.createTextNode(params.get('team')))   
+        }
+
+        function loadingHandler() {
+            var team = params.get('team')
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: SpreadSheetID,
+                range: 'C2:J',
+            }).then(function (response) {
+                var result = response.result; 
+                if(result.values != undefined && result.values.length > 0){
+                    for(i = 0 ; i < result.values.length ; i++){
+                        if(result.values[i][0] == team){
+                            cargoSucSum += Number(result.values[i][1])
+                            cargoTrySum += Number(result.values[i][2])
+                            panalSucSum += Number(result.values[i][3])
+                            panalTrySum += Number(result.values[i][4])
+                            startLevel[(Number(result.values[i][5])-1)]++
+                            endLevel[(Number(result.values[i][6])-1)]++
+                            scoutEva.push(result.values[i][7])
+                            gameSum++
+                        }
+                    }
+
+                    panalAvg = panalTrySum/gameSum  
+                    cargoAvg = cargoTrySum/gameSum
+                    panalSuc = panalSucSum/panalTrySum*100
+                    panalSuc = Math.round(panalSuc*100)/100
+                    cargoSuc = cargoSucSum/cargoTrySum*100
+                    cargoSuc = Math.round(cargoSuc*100)/100
+                    scoreAvg = Math.round((cargoSucSum*3 + panalSucSum*2)/gameSum)
+
+                    Chart.defaults.global.defaultFontSize = 24
+
+                    var Avgchart = new Chart(document.getElementById("Avgbar"), {
+                        type : 'bar',
+                        data : {
+                            labels: ['嘗試panal數','嘗試cargo數'],
+                            datasets:[{
+                                fill:false,
+                                label: '平均嘗試數',
+                                data: [panalAvg , cargoAvg],
+                                backgroundColor:[
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                ],
+                                borderColor:[
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                ],
+                                borderWidth:1
+                            }]
+                        },
+                        options : {
+                            title:{
+                                display:true,
+                                text:'平均嘗試表'
+                            },
+                            maintainAspectRatio: true,
+                            scales: {
+                                xAxes: [
+                                    {
+                                        barPercentage: 0.5,
+                                        barThickness: 50,
+                                        maxBarThickness: 50,
+                                        minBarLength: 2,
+                                        gridLines: {
+                                            offsetGridLines: true
+                                        }
+                                    }
+                                ],  
+                                yAxes:[{
+                                    ticks:{
+                                        beginAtZero:true
+                                    }
+                                }],
+                            }
+                        } 
+                    })
+
+                    var panalSucpie = new Chart(document.getElementById('psPie'),{
+                        type: 'pie',
+                        data : {
+                            labels: ['成功率','失敗率'],
+                            datasets:[{
+                                data:[panalSuc,100-panalSuc],
+                                backgroundColor:[
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)', 
+                                ],
+                                borderColor:[
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                ]
+                            }]
+                        },
+                        options:{
+                            title:{
+                                display:true,
+                                text:'panal成功率'
+                            },
+                        }
+                    })
+
+                    var panalSucpie = new Chart(document.getElementById('csPie'),{
+                        type: 'pie',
+                        data : {
+                            labels: ['成功率','失敗率'],
+                            datasets:[{
+                                data:[cargoSuc,100-cargoSuc],
+                                backgroundColor:[
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)', 
+                                ],
+                                borderColor:[
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                ]
+                            }]
+                        },
+                        options:{
+                            title:{
+                                display:true,
+                                text:'cargo成功率'
+                            },
+                        }
+                    })
+
+                    tr = document.createElement('tr')
+                    th = document.createElement('th')
+                    p = document.createElement('p')
+                    p.appendChild(document.createTextNode(scoreAvg))
+                    th.appendChild(p)
+                    attr = document.createAttribute('scope')
+                    attr.value = 'row'
+                    tr.appendChild(th)
+                    tableBody[0].appendChild(tr)
+
+                    for(i = 0;i<2;i++){
+                        tr = document.createElement('tr')
+                        th = document.createElement('th')
+                        if(i == 0){
+                            th.appendChild(document.createTextNode('開始時'))
+                        }
+                        else {
+                            th.appendChild(document.createTextNode('結束時'))
+                        }
+                        tit = document.createAttribute('scope')
+                        tit.value = "row"
+                        th.setAttributeNode(tit)
+                        tr.appendChild(th)
+                        for(j = 0;j<3;j++){
+                            td = document.createElement('td')
+                            td.appendChild(document.createTextNode(startLevel[j]))
+                            tr.appendChild(td)
+                        }
+                        tableBody[1].appendChild(tr)
+                    }
+                }
+                else {
+                    alert('No data found.');
+                }
+            }, function (response) {
+                alert('Error: ' + response.result.error.message);
+            });
+        }
 
     </script>
 </head>
@@ -45,7 +220,7 @@
     <header>
         <nav class="navbar navbar-dark navbar-expand-md bg-dark mb-3 p-3" id="navbar">
             <a href="/" class="navbar-brand mr-auto">FRC 7589 Scout系統 -- Driver 端</a>
-            <h2 class="text-center" style="color:white" >7589</h2>
+            <h2 class="text-center" style="color:white" id="TN"></h2>
             <button class="btn btn-primary ml-auto" id="auth-btn" onclick=authBtnHandler() style="display:none;"><i class="fab fa-google mr-2"></i>登入Google</button>
             <button class="btn btn-danger ml-auto" id="logout-btn" style="display:none;" onclick=logoutBtnHandler()> <i class="fas fa-sign-out-alt mr-2"></i>登出</button>
         </nav>
@@ -53,13 +228,61 @@
     
     <div class="container-fluid" id="driver-info">
         <form name="main" onsubmit="return false">
-
             <a href="/driver/index.html" class="navbar-brand mr-auto">回上一頁</a>
-
-            
         </form>
-    </div>
+        <div class="row">
 
+            <div class="col-sm-6">
+                 <canvas id="Avgbar" style="display:block" height="275">             
+                        
+                </canvas>
+            </div>
+
+            <div class="col-sm-6">
+                    <table class="table table-striped table-hover" id="ScoreAvg">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">平均得分</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+    
+                        </tbody>
+                    </table>
+    
+                    <table class="table table-striped table-hover" id="startLv">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <h2>出發與結束地點的統計</h2>
+                                    <th scope="col">時間點</th> 
+                                    <th scope="col">第一層</th>
+                                    <th scope="col">第二層</th>
+                                    <th scope="col">第三層</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                    </table>
+                </div>
+            
+        </div>>
+        <div class="row">
+            <div class="col-sm-6">
+                <canvas id="csPie" style="display:block" height="275">
+                    
+                </canvas>
+            </div>
+
+            <div class="col-sm-6">
+                    <canvas id="psPie" style="display: block" height="275">
+                
+                    </canvas>
+            </div>
+        </div>
+
+        
+    </div>
 </body>
 
 </html>
