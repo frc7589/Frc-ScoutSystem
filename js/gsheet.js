@@ -7,7 +7,7 @@ var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"
 
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
-var SCOPES = "https://www.googleapis.com/auth/drive.file";
+var SCOPES = "https://www.googleapis.com/auth/drive";
 
 /**
  *  Called when the signed in status changes, to update the UI
